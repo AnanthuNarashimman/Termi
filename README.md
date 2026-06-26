@@ -1,4 +1,4 @@
-# Termi — AI Terminal Agent
+# Termi - AI Terminal Agent
 
 A conversational CLI agent that translates natural language into bash commands using Google Gemini, then executes them inside a sandboxed workspace directory.
 
