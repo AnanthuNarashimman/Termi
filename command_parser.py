@@ -31,7 +31,8 @@ def agent():
             break
 
         try:
-            current_files = subprocess.check_output("ls -l", shell=True, cwd=current_cwd, text=True).strip()
+            tree_cmd = "find . -maxdepth 3 -not -path '*/.*' | sort"
+            current_files = subprocess.check_output(tree_cmd, shell=True, cwd=current_cwd, text=True).strip()
         except subprocess.CalledProcessError:
             current_files = "Error reading directory."
 
