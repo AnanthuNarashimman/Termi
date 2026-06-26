@@ -1,2 +1,4 @@
 /venv
 .env
+workspace/
+test.py

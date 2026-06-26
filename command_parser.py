@@ -1,44 +1,74 @@
-
-from google import genai
-from dotenv import load_dotenv
+import json
+import subprocess
 import os
+from google import genai
+from google.genai import types
+from dotenv import load_dotenv
 
 load_dotenv()
-
 client = genai.Client()
 
 def agent():
 
-    while(True):
-        prompt = input("Enter purpose:")
+    # initializing sandbox directory
+    workspace = os.path.join(os.getcwd(), "workspace")
+    os.makedirs(workspace, exist_ok=True)
+    print(f"Agent sandbox initialized at :{workspace}\n")
 
-        if(prompt == "exit"):
+    while True:
+        user_prompt = input("Enter Purpose (or 'exit'):")
+
+        if user_prompt.lower() == "exit":
             return None
+        
 
-        interaction = client.interactions.create(
-        model="gemini-2.5-flash-lite",
-        input= prompt,
-        system_instruction="""You are an expert Ubuntu filesystem assistant. Your purpose is to translate user intents into precise Ubuntu terminal commands for file navigation and management.
-                        OPERATING CONTEXT:
-                        Assume a standard Ubuntu environment. Treat all files, directories, and paths mentioned by the user as if they already exist. Do not ask for verification.
+        # API calling
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=user_prompt,
+            config = types.GenerateContentConfig(
+                system_instruction="""You are an expert Ubuntu filesystem assistant. 
+                Your only capability is to translate user intents into precise Ubuntu terminal commands.
+                Output strictly in JSON format: {"action": "description", "command": "bash command"}"""
+            )
+        )
 
-                        OUTPUT FORMAT:
-                        You must respond strictly with a valid JSON object. Do not include introductory text, explanations, or markdown formatting (do not use ```json block ticks). 
+        raw_text = response.text
 
-                        Use this exact JSON schema:
-                        {
-                        "action": "A brief, 1-2 sentence description of what the command will do",
-                        "command": "The exact bash command to execute"
-                        }
-                        """
-                        )   
-        print(interaction.output_text)
+        try:
+            clean_text = raw_text.strip(" `\n").removeprefix("json\n")
+            parsed_json = json.loads(clean_text)
 
-        choice = input("Execute(y/n)?")
-        if(choice.lower == 'y'):
-            print("Done!")
+            action_desc = parsed_json.get("action")
+            bash_command = parsed_json.get("command")
+
+        except json.JSONDecodeError:
+            print(f"Error: Model failed to output a valid JSON. Raw output: \n{raw_text}")
+            continue
+
+        print(f"\nAction: {action_desc}")
+        print(f"Command: {bash_command}")
+
+        choice = input("\nExecute (y/n)?")
+        if(choice.lower() == 'y'):
+            print("Executing...")
+
+            result = subprocess.run(
+                bash_command,
+                shell=True,
+                capture_output=True,
+                text=True,
+                cwd=workspace
+            )
+
+            print(f"\n ----STDOUT---- \n {result.stdout.strip()}")
+
+            if result.stderr:
+                print(f"\n ----STDERR---- \n {result.stderr.strip()}")
+
         else:
-            print("My bad!")
+            print("Execution Aborted")
+
 
 
 if __name__ == "__main__":
