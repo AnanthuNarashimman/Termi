@@ -66,13 +66,11 @@ def agent():
             print("Executing...")
 
             result = subprocess.run(
-                bash_command,
-                shell=True,
-                capture_output=True,
-                text=True,
-                cwd=current_cwd
-            )
-
+                    ["powershell", "-Command", bash_command],
+                    capture_output=True,
+                    text=True,
+                    cwd=current_cwd
+                )
             if bash_command.startswith("cd"):
                 target_dir = bash_command.split("cd ")[1].split("&&")[0].strip()
                 potential_new_cwd = os.path.abspath(os.path.join(current_cwd, target_dir))
