@@ -1,30 +1,31 @@
 # Termi - AI Terminal Agent
 
-A conversational CLI agent that translates natural language into bash commands using Google Gemini, then executes them inside a sandboxed workspace directory.
+A conversational CLI agent that translates natural language into PowerShell commands using Google Gemini, then executes them inside a sandboxed workspace directory.
 
 ## What it does
 
 You describe what you want to accomplish (e.g. "create a folder called projects and add a file called notes.txt"), and the agent:
 
 1. Sends your request along with the current working directory and file tree to Gemini 2.5 Flash.
-2. Displays the proposed bash command and a plain-English description of the action.
+2. Displays the proposed PowerShell command and a plain-English description of the action.
 3. Asks for your confirmation before running anything.
 4. Executes the command inside an isolated `workspace/` subdirectory, preventing any writes outside of it.
 
 ## Requirements
 
+- Windows (uses PowerShell for execution)
 - Python 3.10+
 - A Google Gemini API key
 
 ## Setup
 
-```bash
+```powershell
 # 1. Clone / enter the project directory
 cd agent_workspace
 
 # 2. Create and activate a virtual environment
-python3 -m venv venv
-source venv/bin/activate
+python -m venv venv
+.\venv\Scripts\activate
 
 # 3. Install dependencies
 pip install google-genai python-dotenv
@@ -35,7 +36,7 @@ echo "GEMINI_API_KEY=your_key_here" > .env
 
 ## Running
 
-```bash
+```powershell
 python command_parser.py
 ```
 
