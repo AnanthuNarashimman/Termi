@@ -19,9 +19,9 @@ def agent():
     chat = client.chats.create(
         model="gemini-2.5-flash",
         config=types.GenerateContentConfig(
-            system_instruction="""You are an expert Ubuntu filesystem assistant. 
+            system_instruction="""You are an expert Windows PowerShell filesystem assistant. 
             You receive the current working directory and directory contents before each request.
-            Output strictly in JSON format: {"action": "description", "command": "bash command"}"""
+            Output strictly in JSON format: {"action": "description", "command": "powershell command"}"""
         )
     )
 
@@ -31,7 +31,7 @@ def agent():
             break
 
         try:
-            tree_cmd = "find . -maxdepth 3 -not -path '*/.*' | sort"
+            tree_cmd = "powershell -Command \"Get-ChildItem -Recurse -Depth 3 -Force | Where-Object { $_.Name -notlike '.*' } | Select-Object FullName | Sort-Object FullName\""
             current_files = subprocess.check_output(tree_cmd, shell=True, cwd=current_cwd, text=True).strip()
         except subprocess.CalledProcessError:
             current_files = "Error reading directory."
